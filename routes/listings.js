@@ -18,10 +18,13 @@ const upload = multer({
 });
 
 const schema = {
+  id: Joi.string().optional(),
   title: Joi.string().required(),
   description: Joi.string().allow(""),
   price: Joi.number().required().min(1),
   categoryId: Joi.number().required().min(1),
+  userId:Joi.string().required(),
+  images:Joi.array().optional(),
   location: Joi.object({
     latitude: Joi.number().required(),
     longitude: Joi.number().required(),
@@ -35,8 +38,13 @@ const validateCategoryId = (req, res, next) => {
   next();
 };
 
-router.get("/", (req, res) => {
-  const listings = store.getListings();
+router.get("/", async (req, res) => {
+  let listings = [];
+  try {
+    listings = await store.getListings();  
+  } catch (error) {
+    console.log(error);
+  }
   const resources = listings.map(listingMapper);
   res.send(resources);
 });
@@ -52,10 +60,10 @@ router.post(
     // stored in the uploads folder. We'll need to clean up this folder
     // using a separate process.
     // auth,
-    upload.array("images", config.get("maxImageCount")),
+    // upload.array("images", config.get("maxImageCount")),
     validateWith(schema),
     validateCategoryId,
-    imageResize,
+    // imageResize,
   ],
 
   async (req, res) => {
@@ -65,8 +73,10 @@ router.post(
       categoryId: parseInt(req.body.categoryId),
       description: req.body.description,
     };
-    listing.images = req.images.map((fileName) => ({ fileName: fileName }));
-    if (req.body.location) listing.location = JSON.parse(req.body.location);
+    // listing.images = req.images.map((fileName) => ({ fileName: fileName }));
+    console.log(req.body.location);
+    if (req.body.location) listing.location = req.body.location
+    // JSON.parse(req.body.location);
     if (req.user) listing.userId = req.user.userId;
 
     store.addListing(listing);

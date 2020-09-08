@@ -24,7 +24,7 @@ const add = async(message) => {
   message.id = messages.length + 1;
   message.dateTime = Date.now();
   let newMessage = new model({...message})
-  await newMessage.save();
+  return await newMessage.save();
   // messages.push(message);
 };
 

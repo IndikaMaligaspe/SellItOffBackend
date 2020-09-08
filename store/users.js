@@ -20,22 +20,8 @@ const UserSchema = mongoose.Schema({
   images: [{filename:String}],
 });
 
-// const users = [
-//   {
-//     id: 1,
-//     name: "Mosh",
-//     email: "mosh@domain.com",
-//     password: "12345",
-//     images:[{ fileName: "Mosh" }],
-//   },
-//   {
-//     id: 2,
-//     name: "John",
-//     email: "john@domain.com",
-//     password: "12345",
-//     images:[{ fileName: "John" }],
-//   },
-// ];
+const model = mongoose.model('User',UserSchema);
+
 
 const getUsers = async ()=> {
     return await model.find().lean();
@@ -72,3 +58,20 @@ module.exports = {
   getUserById,
   addUser,
 };
+
+// const users = [
+//   {
+//     id: 1,
+//     name: "Mosh",
+//     email: "mosh@domain.com",
+//     password: "12345",
+//     images:[{ fileName: "Mosh" }],
+//   },
+//   {
+//     id: 2,
+//     name: "John",
+//     email: "john@domain.com",
+//     password: "12345",
+//     images:[{ fileName: "John" }],
+//   },
+// ];
