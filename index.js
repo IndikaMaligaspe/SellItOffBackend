@@ -1,4 +1,7 @@
+const env = require("dotenv/config");
 const express = require("express");
+const mongoose = require("mongoose");
+
 const categories = require("./routes/categories");
 const listings = require("./routes/listings");
 const listing = require("./routes/listing");
@@ -29,6 +32,10 @@ app.use("/api/expoPushTokens", expoPushTokens);
 app.use("/api/messages", messages);
 
 const port = process.env.PORT || config.get("port");
+
+mongoose.connect(process.env.DB_CONNECTION, {useNewUrlParser:true, useUnifiedTopology:true}, ()=>{
+  console.log("Connection to database success...");
+});
 app.listen(port, function() {
   console.log(`Server started on port ${port}...`);
 });

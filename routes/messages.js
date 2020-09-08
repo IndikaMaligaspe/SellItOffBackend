@@ -1,4 +1,5 @@
 const express = require("express");
+const mapper = require("../mappers/user")
 const router = express.Router();
 const Joi = require("joi");
 const { Expo } = require("expo-server-sdk");
@@ -15,12 +16,17 @@ const schema = {
   message: Joi.string().required(),
 };
 
-router.get("/", auth, (req, res) => {
+router.get("/", auth, async (req, res) => {
+  
+  console.log(req.user);
   const messages = messagesStore.getMessagesForUser(req.user.userId);
 
-  const mapUser = (userId) => {
-    const user = usersStore.getUserById(userId);
-    return { id: user.id, name: user.name };
+  const mapUser = async (userId) => {
+    
+    const newUser = await usersStore.getUserById(userId)
+    const user = mapper.mapper(newUser);
+
+    return { id: user.id, name: user.name, images:user.images };
   };
 
   const resources = messages.map((message) => ({
@@ -31,7 +37,7 @@ router.get("/", auth, (req, res) => {
     fromUser: mapUser(message.fromUserId),
     toUser: mapUser(message.toUserId),
   }));
-
+  // console.log(resources);
   res.send(resources);
 });
 

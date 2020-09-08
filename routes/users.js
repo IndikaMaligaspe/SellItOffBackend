@@ -24,30 +24,46 @@ router.post("/",
   [
     upload.array("images", "1"), 
     // validateWith(schema),
-    imageResize,
+    // imageResize,
   ],
  
-  (req, res) => {
+  async (req, res) => {
     console.log(req.body);
     const user = { 
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
+      images: req.body.images,
     };
-    user.images = req.images.map((fileName) => ({ fileName: fileName }));
-    if (usersStore.getUserByEmail(user.emailemail))
+    let  found =  false;
+    try{
+      found = await usersStore.getUserByEmail(user.email);
+    }catch(error){
+
+    }
+    if (found)
       return res
         .status(400)
         .send({ error: "A user with the given email already exists." });
-    usersStore.addUser(user);
-    res.status(201).send(user);
+    if (req.images)    
+      user.images = req.images.map((fileName) => ({ fileName: fileName }));
+    const newUser = await usersStore.addUser(user);
+    res.status(201).send(newUser);
+    
 });
 
 
-router.get("/", (req, res) => {
-  const users = usersStore.getUsers()
-  console.log(users);
+router.get("/", async(req, res) => {
+  let users = []
+  try {
+     users = await usersStore.getUsers()  
+  } catch (error) {
+    console.log(error);
+  }
+  
+  
   const resources = users.map(userMapper);
+  console.log(users);
   res.send(resources);
 });
 

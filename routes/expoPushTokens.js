@@ -9,8 +9,8 @@ const validateWith = require("../middleware/validation");
 router.post(
   "/",
   [auth, validateWith({ token: Joi.string().required() })],
-  (req, res) => {
-    const user = usersStore.getUserById(req.user.userId);
+  async (req, res) => {
+    const user = await usersStore.getUserById(req.user.userId);
     if (!user) return res.status(400).send({ error: "Invalid user." });
 
     user.expoPushToken = req.body.token;

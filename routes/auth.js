@@ -10,9 +10,13 @@ const schema = {
   password: Joi.string().required().min(5),
 };
 
-router.post("/", validateWith(schema), (req, res) => {
+router.post("/", validateWith(schema), async (req, res) => {
   const { email, password } = req.body;
-  const user = usersStore.getUserByEmail(email);
+  let user = {};
+  try {
+    user = await usersStore.getUserByEmail(email);
+  } catch (error) {
+  } 
   if (!user || user.password !== password)
     return res.status(400).send({ error: "Invalid email or password." });
 

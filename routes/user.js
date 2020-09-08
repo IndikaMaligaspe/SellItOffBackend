@@ -6,11 +6,16 @@ const listingsStore = require("../store/listings");
 const auth = require("../middleware/auth");
 const userMapper = require("../mappers/user");
 
-router.get("/:id", auth, (req, res) => {
-  const userId = parseInt(req.params.id);
-  const user = usersStore.getUserById(userId);
+router.get("/:id", auth, async (req, res) => {
+  const userId = req.params.id;
+  let user = {}
+  try{
+    user = await usersStore.getUserById(userId);
+  }catch(error){
+    return res.status(404).send();
+  }
+  
   if (!user) return res.status(404).send();
-  console.log(userId);
   const listings = listingsStore.filterListings(
     listing => listing.userId === userId
   );

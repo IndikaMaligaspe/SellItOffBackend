@@ -1,29 +1,69 @@
-const users = [
-  {
-    id: 1,
-    name: "Mosh",
-    email: "mosh@domain.com",
-    password: "12345",
-    images:[{ fileName: "Mosh" }],
+const mongoose = require('mongoose')
+
+const UserSchema = mongoose.Schema({
+  id: {
+      type: Number,
+      required: true,
   },
-  {
-    id: 2,
-    name: "John",
-    email: "john@domain.com",
-    password: "12345",
-    images:[{ fileName: "John" }],
+  name: {
+     type:String,
+     required: true,
   },
-];
+  email: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  images: [{filename:String}],
+});
 
-const getUsers = () => users;
+// const users = [
+//   {
+//     id: 1,
+//     name: "Mosh",
+//     email: "mosh@domain.com",
+//     password: "12345",
+//     images:[{ fileName: "Mosh" }],
+//   },
+//   {
+//     id: 2,
+//     name: "John",
+//     email: "john@domain.com",
+//     password: "12345",
+//     images:[{ fileName: "John" }],
+//   },
+// ];
 
-const getUserById = (id) => users.find((user) => user.id === id);
+const getUsers = async ()=> {
+    return await model.find().lean();
+}
 
-const getUserByEmail = (email) => users.find((user) => user.email === email);
+const getUserById = async (id) => {
+      return await model.findById(id).lean();
+}
 
-const addUser = (user) => {
+const getUserByEmail = async (email) => {
+  return await model.exists({email :email});
+};
+
+const addUser = async (user) => {
   user.id = users.length + 1;
-  users.push(user);
+  const newUser = new model({
+    id : user.id,
+    name : user.name,
+    email: user.email,
+    password: user.password,
+    images: user.images
+  });
+  try {
+    return newUser.save();
+  } catch (error) {
+    console.log(error);
+  }
+  return ;
 };
 
 module.exports = {
