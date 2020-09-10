@@ -9,7 +9,12 @@ const validation = require("../middleware/validation");
 
 router.get("/", async (req, res) => {
 
-  let categories = await categoriesStore.getCategories();
+  let categories = []
+  try {
+    categories = await categoriesStore.getCategories(); 
+  } catch (error) {
+  }
+  // console.log(categories);
   res.send(categories);
 });
 

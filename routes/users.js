@@ -23,8 +23,8 @@ const schema = {
 router.post("/", 
   [
     upload.array("images", "1"), 
-    // validateWith(schema),
-    // imageResize,
+    validateWith(schema),
+    imageResize,
   ],
  
   async (req, res) => {
@@ -47,6 +47,7 @@ router.post("/",
         .send({ error: "A user with the given email already exists." });
     if (req.images)    
       user.images = req.images.map((fileName) => ({ fileName: fileName }));
+      // console.log(user.images);
     const newUser = await usersStore.addUser(user);
     res.status(201).send(newUser);
     

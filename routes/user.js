@@ -16,9 +16,15 @@ router.get("/:id", auth, async (req, res) => {
   }
   
   if (!user) return res.status(404).send();
-  const listings = listingsStore.filterListings(
-    listing => listing.userId === userId
-  );
+  let listings = []
+  try{
+    listings = await listingsStore.filterListings(
+      listing => listing.userId === userId
+    );
+  }catch(error){
+
+  }
+  
   const resources = userMapper.mapper(user);
 
   res.send({

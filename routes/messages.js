@@ -18,8 +18,13 @@ const schema = {
 
 router.get("/", auth, async (req, res) => {
   
-  console.log(req.user);
-  const messages = messagesStore.getMessagesForUser(req.user.userId);
+  // console.log(req.user);
+  let messages = []
+  try {
+    messages = await messagesStore.getMessagesForUser(req.user.userId); 
+  } catch (error) {
+    
+  }
 
   const mapUser = async (userId) => {
     
@@ -37,7 +42,7 @@ router.get("/", auth, async (req, res) => {
     fromUser: mapUser(message.fromUserId),
     toUser: mapUser(message.toUserId),
   }));
-  // console.log(resources);
+  console.log(resources);
   res.send(resources);
 });
 

@@ -22,8 +22,8 @@ const schema = {
   title: Joi.string().required(),
   description: Joi.string().allow(""),
   price: Joi.number().required().min(1),
-  categoryId: Joi.number().required().min(1),
-  userId:Joi.string().required(),
+  categoryId: Joi.string().required().min(1),
+  userId:Joi.string().optional(),
   images:Joi.array().optional(),
   location: Joi.object({
     latitude: Joi.number().required(),
@@ -31,8 +31,8 @@ const schema = {
   }).optional(),
 };
 
-const validateCategoryId = (req, res, next) => {
-  if (!categoriesStore.getCategory(parseInt(req.body.categoryId)))
+const validateCategoryId = async (req, res, next) => {
+  if (!await categoriesStore.getCategory(req.body.categoryId))
     return res.status(400).send({ error: "Invalid categoryId." });
 
   next();
@@ -59,13 +59,13 @@ router.post(
     // if the request is invalid, we'll end up with one or more image files
     // stored in the uploads folder. We'll need to clean up this folder
     // using a separate process.
-    // auth,
-    // upload.array("images", config.get("maxImageCount")),
+    auth,
+    upload.array("images", config.get("maxImageCount")),
     validateWith(schema),
     validateCategoryId,
-    // imageResize,
+    imageResize,
   ],
-
+ 
   async (req, res) => {
     const listing = {
       title: req.body.title,
@@ -73,12 +73,11 @@ router.post(
       categoryId: parseInt(req.body.categoryId),
       description: req.body.description,
     };
-    // listing.images = req.images.map((fileName) => ({ fileName: fileName }));
-    console.log(req.body.location);
-    if (req.body.location) listing.location = req.body.location
-    // JSON.parse(req.body.location);
+    // console.log(req.user);
+    listing.images = req.images.map((fileName) => ({ fileName: fileName }));
+    if (req.body.location) listing.location = JSON.parse(req.body.location);
     if (req.user) listing.userId = req.user.userId;
-
+    // console.log(req.body.location);
     store.addListing(listing);
 
     res.status(201).send(listing);

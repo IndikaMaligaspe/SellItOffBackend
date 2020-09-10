@@ -21,10 +21,10 @@ const getCategories = async () => {
   return categories;
 }
 
-const getCategory =async  (id) => {
+const getCategory =async  (_id) => {
   let category = {}
   try{
-    category =  await model.findById(id).lean();
+    category =  await model.findById(_id).lean();
   }catch(error){
     console.log(error);
   }

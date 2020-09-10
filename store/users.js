@@ -1,6 +1,14 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const { string } = require('joi');
+// const { string } = require('joi');
 
-const UserSchema = mongoose.Schema({
+const FileSchema = new mongoose.Schema({
+  fileName: {
+      type: String,
+  },
+});
+
+const UserSchema = new mongoose.Schema({
   id: {
       type: Number,
       required: true,
@@ -17,7 +25,7 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  images: [{filename:String}],
+  images:[FileSchema],
 });
 
 const model = mongoose.model('User',UserSchema);
@@ -32,17 +40,34 @@ const getUserById = async (id) => {
 }
 
 const getUserByEmail = async (email) => {
-  return await model.exists({email :email});
+  // console.log(email);
+  let user = {}
+  try {
+    user  = await model.findOne({email :email}).lean();
+  } catch (error) {
+    console.log(error)
+  }
+  return user;
 };
 
 const addUser = async (user) => {
-  user.id = users.length + 1;
+  try {
+    let users = await getUsers();
+    user.id = users.length + 1
+  } catch (error) {
+    user.id = 0;
+  }
+  
+
   const newUser = new model({
     id : user.id,
     name : user.name,
     email: user.email,
     password: user.password,
-    images: user.images
+  });
+
+  user.images.forEach(image => {
+   newUser.images.push(image);
   });
   try {
     return newUser.save();
