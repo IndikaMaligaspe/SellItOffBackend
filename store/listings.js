@@ -38,7 +38,7 @@ const addListing = async (listing) => {
 
 const getListings = async () => await model.find().lean();
 
-const getListing = async (id) => await model.find({id : id}).lean();
+const getListing = async (id) => await model.findOne({_id : id}).lean();
 
 const filterListings = async (predicate) => {
   return await model.find({predicate}).lean();

@@ -36,7 +36,13 @@ const getUsers = async ()=> {
 }
 
 const getUserById = async (id) => {
-      return await model.findById(id).lean();
+  console.log(id);
+  let user = {}
+  try{
+    user  = await model.findOne({_id : id}).lean();
+  }catch(error){
+  }
+  return  user;
 }
 
 const getUserByEmail = async (email) => {

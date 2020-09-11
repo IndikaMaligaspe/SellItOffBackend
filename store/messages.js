@@ -1,10 +1,6 @@
 const mongoose = require('mongoose')
 
 const MessageSchema = mongoose.Schema({
-  id: {
-    type: String,
-    required: true,
-  },
   content: String,
   fromUser: String,
   toUser: String,
@@ -18,16 +14,33 @@ const MessageSchema = mongoose.Schema({
 const model = mongoose.model('Message',MessageSchema);
 
 const getMessagesForUser = async (toUserId) =>
-  await model.find({toUserId : toUserId}).lean();
+  {
+    return await model.find({toUser : toUserId}).lean();
+  }
+const deleteMessageById = async (id) =>{
+  let status = 500;
+  try {
+    let response = await model.deleteOne({_id : id});
+    status = 200  
+  } catch (error) {
+    status = 500
+  }
+  return status;
+}
 
 const add = async(message) => {
-  message.id = messages.length + 1;
+  // message.id = messages.length + 1;
   message.dateTime = Date.now();
-  let newMessage = new model({...message})
-  return await newMessage.save();
-  // messages.push(message);
+  let newMessage = new model({...message ,fromUser:message.fromUserId, toUser: message.toUserId})
+  let response = {};
+  try {
+    response = await newMessage.save();  
+  } catch (error) {
+    console.log(error);
+  } 
+  return response;
 };
 
-module.exports = { add, getMessagesForUser };
+module.exports = { add, getMessagesForUser, deleteMessageById };
 
 

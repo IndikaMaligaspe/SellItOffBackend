@@ -12,50 +12,65 @@ const auth = require("../middleware/auth");
 const validateWith = require("../middleware/validation");
 
 const schema = {
-  listingId: Joi.number().required(),
+  listingId: Joi.string().required(),
   message: Joi.string().required(),
 };
 
 router.get("/", auth, async (req, res) => {
-  
-  // console.log(req.user);
   let messages = []
   try {
     messages = await messagesStore.getMessagesForUser(req.user.userId); 
   } catch (error) {
-    
+    console.log(error);
   }
 
   const mapUser = async (userId) => {
-    
-    const newUser = await usersStore.getUserById(userId)
-    const user = mapper.mapper(newUser);
+    let newUser = {}
+    try{
+      newUser = await usersStore.getUserById(userId)
+    }catch(error){
 
-    return { id: user.id, name: user.name, images:user.images };
+    }  
+    const user = mapper.mapper(newUser);
+    return { _id: user.id, name: user.name, images:user.images };
   };
 
-  const resources = messages.map((message) => ({
-    id: message.id,
-    listingId: message.listingId,
-    dateTime: message.dateTime,
-    content: message.content,
-    fromUser: mapUser(message.fromUserId),
-    toUser: mapUser(message.toUserId),
-  }));
-  console.log(resources);
-  res.send(resources);
+   const resp =  await Promise.all(messages.map( async (message) => ({
+      _id: message._id,
+      listingId: message.listingId,
+      dateTime: message.dateTime,
+      content: message.content,
+      fromUser: await mapUser(message.fromUser),
+      toUser:   await mapUser(message.toUser),
+   })));
+  res.send(resp);
 });
 
-router.post("/", [auth, validateWith(schema)], async (req, res) => {
+router.post("/", 
+  [ auth, 
+    // validateWith(schema)
+  ], async (req, res) => {
   const { listingId, message } = req.body;
-
-  const listing = listingsStore.getListing(listingId);
+  let listing = [];
+  try {
+    listing = await listingsStore.getListing(listingId); 
+    console.log(listing)
+  } catch (error) {
+    console.log(error);
+    
+  }
   if (!listing) return res.status(400).send({ error: "Invalid listingId." });
 
-  const targetUser = usersStore.getUserById(parseInt(listing.userId));
+  let targetUser = [];
+  try {
+    targetUser = await usersStore.getUserById(listing.userId);  
+  } catch (error) {
+    console.log(error);
+  }
+  
   if (!targetUser) return res.status(400).send({ error: "Invalid userId." });
 
-  messagesStore.add({
+  await messagesStore.add({
     fromUserId: req.user.userId,
     toUserId: listing.userId,
     listingId,
@@ -70,4 +85,16 @@ router.post("/", [auth, validateWith(schema)], async (req, res) => {
   res.status(201).send();
 });
 
+router.delete("/:id",async(req,res) =>{
+   let messageId = req.params.id;
+   let status = 401;
+   try{
+     status = await messagesStore.deleteMessageById(messageId);
+   }catch(error){
+     console.log(error);
+
+   }
+   console.log(status);
+   res.status(status).send();
+});
 module.exports = router;
