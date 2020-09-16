@@ -1,5 +1,11 @@
 const mongoose = require('mongoose')
 
+const FileSchema = new mongoose.Schema({
+  fileName: {
+      type: String,
+  },
+})
+
 const MessageSchema = mongoose.Schema({
   content: String,
   fromUser: String,
@@ -8,7 +14,8 @@ const MessageSchema = mongoose.Schema({
   dateTime: {
     type: Date,
     default:Date.now,
-  }
+  },
+  images:[FileSchema],
 });
 
 const model = mongoose.model('Message',MessageSchema);
@@ -28,10 +35,29 @@ const deleteMessageById = async (id) =>{
   return status;
 }
 
+const getChatsForTopic = async (sellerdId, buyerId, listingId) =>{
+   let chats = [];
+   try {
+     chats = await model.find({$or :[{listingId:listingId, fromUser:sellerdId, toUser:buyerId}, 
+                                        {listingId:listingId, toUser:sellerdId, fromUser:buyerId}]}).sort('dateTime').lean();
+     return chats;
+   } catch (error) {
+     return error; 
+   }
+}
+
 const add = async(message) => {
   // message.id = messages.length + 1;
   message.dateTime = Date.now();
-  let newMessage = new model({...message ,fromUser:message.fromUserId, toUser: message.toUserId})
+  let newMessage = new model({
+    content:message.message ,
+    fromUser:message.fromUserId, 
+    toUser: message.toUserId, 
+    listingId:message.listingId})
+
+  message.images.forEach(image => {
+    newMessage.images.push(image);
+  });
   let response = {};
   try {
     response = await newMessage.save();  
@@ -41,6 +67,6 @@ const add = async(message) => {
   return response;
 };
 
-module.exports = { add, getMessagesForUser, deleteMessageById };
+module.exports = { add, getMessagesForUser, deleteMessageById , getChatsForTopic };
 
 

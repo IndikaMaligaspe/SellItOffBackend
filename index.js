@@ -11,6 +11,7 @@ const auth = require("./routes/auth");
 const my = require("./routes/my");
 const messages = require("./routes/messages");
 const expoPushTokens = require("./routes/expoPushTokens");
+const chats = require("./routes/chats");
 const helmet = require("helmet");
 const compression = require("compression");
 const config = require("config");
@@ -30,6 +31,7 @@ app.use("/api/auth", auth);
 app.use("/api/my", my);
 app.use("/api/expoPushTokens", expoPushTokens);
 app.use("/api/messages", messages);
+app.use("/api/chats", chats);
 
 const port = process.env.PORT || config.get("port");
 
