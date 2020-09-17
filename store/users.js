@@ -26,10 +26,18 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
   images:[FileSchema],
+  expoPushToken:{
+    type:String,
+    required:false,
+  },
 });
 
 const model = mongoose.model('User',UserSchema);
 
+
+const setExpoPushToken = async (user) =>{
+   await model.findOneAndUpdate({_id:user._id}, user);
+}
 
 const getUsers = async ()=> {
     return await model.find().lean();
@@ -88,6 +96,7 @@ module.exports = {
   getUserByEmail,
   getUserById,
   addUser,
+  setExpoPushToken,
 };
 
 // const users = [

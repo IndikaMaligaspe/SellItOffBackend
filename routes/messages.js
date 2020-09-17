@@ -32,7 +32,7 @@ router.get("/", auth, async (req, res) => {
 
     }  
     const user = mapper.mapper(newUser);
-    return { _id: user.id, name: user.name, images:user.images };
+    return { _id: user._id, name: user.name, images:user.images };
   };
 
    const resp =  await Promise.all(messages.map( async (message) => ({

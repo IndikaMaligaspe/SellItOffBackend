@@ -12,8 +12,9 @@ router.post(
   async (req, res) => {
     const user = await usersStore.getUserById(req.user.userId);
     if (!user) return res.status(400).send({ error: "Invalid user." });
-
-    user.expoPushToken = req.body.token;
+    console.log(req.body.token); 
+    newUser = {...user, expoPushToken:req.body.token}
+    await usersStore.setExpoPushToken(newUser);
     console.log("User registered for notifications: ", user);
     res.status(201).send();
   }

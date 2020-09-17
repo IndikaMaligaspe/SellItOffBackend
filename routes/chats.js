@@ -8,6 +8,7 @@ const auth = require("../middleware/auth");
 const validateWith = require("../middleware/validation");
 const messageStore = require("../store/messages");
 const chatsMapper = require("../mappers/chats");
+const usersStore = require("../store/users");
 const sendPushNotification = require("../utilities/pushNotifications");
 
 const upload = multer({
@@ -23,7 +24,6 @@ router.get("/:sellerid/:buyerid/:listingid",[
         buyerId  = req.params.buyerid;
         listingId = req.params.listingid;
         let id = '5f56fb77ddbda93564b7248b'
-        console.log(req.user);
 
         console.log(`${sellerdId} - ${buyerId} - ${listingId}`);
         let response = [];
@@ -46,7 +46,6 @@ router.post("/",
         imageResize, 
     ], 
     async (req, res)=>{
-        // console.log(req);
         let chatMessage = {
             message: req.body.chatMessage,
             fromUserId: req.body.fromUser,
@@ -55,9 +54,19 @@ router.post("/",
             images:req.images.map((fileName) => ({ fileName: fileName }))
         }
 
-        console.log(chatMessage);
         try{
             await messageStore.add(chatMessage);
+            
+            let targetUser = [];
+            try {
+                targetUser = await usersStore.getUserById(chatMessage.toUserId);  
+                const { expoPushToken } = targetUser;
+                if (Expo.isExpoPushToken(expoPushToken))
+                  await sendPushNotification(expoPushToken, chatMessage.message);
+
+            } catch (error) {
+                console.log(error);
+            } 
             res.status(201).send();
         }catch{
             res.status(400).send("User Error");
