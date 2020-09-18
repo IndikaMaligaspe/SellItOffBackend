@@ -62,7 +62,7 @@ router.post("/",
                 targetUser = await usersStore.getUserById(chatMessage.toUserId);  
                 const { expoPushToken } = targetUser;
                 if (Expo.isExpoPushToken(expoPushToken))
-                  await sendPushNotification(expoPushToken, chatMessage.message);
+                  await sendPushNotification(expoPushToken, chatMessage.message,{screen:"chat"});
 
             } catch (error) {
                 console.log(error);
